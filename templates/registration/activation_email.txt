@@ -1,0 +1,6 @@
+{% load i18n %}
+{% trans "这是一封来自" %} {{ site.name }} {% trans "的邮件，请点击以下链接进行清华邮箱绑定" %}:
+
+http://{{ site.domain }}{% url 'registration_activate' activation_key %}
+
+{% blocktrans %} 注：该链接有效期为 {{ expiration_days }} 天。{% endblocktrans %}

@@ -1,0 +1,19 @@
+{
+  "SECRET_KEY": "ThisIsARandomStringWithLength=50!-----------------",
+  "DEBUG": true,
+  "IGNORE_WECHAT_SIGNATURE": false,
+  "WECHAT_TOKEN": "ThisIsAWeChatTokenWhichCanBeARandomString",
+  "WECHAT_APPID": "PleaseCopyFromWebsite",
+  "WECHAT_SECRET": "PleaseCopyFromWebsite",
+  "DB_NAME": "wechat_ticket",
+  "DB_USER": "root",
+  "DB_PASS": "",
+  "DB_HOST": "127.0.0.1",
+  "DB_PORT": "3306",
+  "SITE_DOMAIN": "http://your.domain",
+  "EMAIL_USE_TLS": true,
+  "EMAIL_HOST": "smtp.126.com",
+  "EMAIL_PORT": "port_number(for example: 25)",
+  "EMAIL_HOST_USER": "user_name@host_name.com",
+  "EMAIL_HOST_PASSWORD": "xxxxxxx"
+}

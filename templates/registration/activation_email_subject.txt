@@ -1,0 +1,1 @@
+{% load i18n %}{{ site.name }}{% trans "清华邮箱绑定" %}
