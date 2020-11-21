@@ -189,6 +189,19 @@ class CreateActivityTest(TestCase):
         self.assertEqual(0, res['code'])
         self.assertEqual("place", Activity.objects.get(name='name').place)
 
+    def test_createActivity_invalid(self):
+        act = {"name": "name", "key": "key", "place": "place", "description": "description", "picUrl": "picUrl",
+               "startTime": "2020-11-31 00:00",
+               "endTime": "2020-12-1 00:00",
+               "bookStart": "2020-11-25 00:00",
+               "bookEnd": "2020-11-26 00:00",
+               "totalTickets": 1000, "status": Activity.STATUS_PUBLISHED}
+        c = Client()
+        c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
+        res = c.post('/api/a/activity/create', act).json()
+        self.assertEqual(0, res['code'])
+        self.assertEqual("place", Activity.objects.get(name='name').place)
+
     def test_createActivity_not_login(self):
         act = {"name": "name1", "key": "key1", "place": "place1", "description": "description1", "picUrl": "picUrl1",
                "startTime": timezone.make_aware(datetime.datetime(2018, 10, 28, 8, 0, 0, 0)),
@@ -391,6 +404,7 @@ class ActivityDetailTest(TestCase):
         }
         c = Client()
         res = c.post('/api/a/activity/detail', act_changed_detail).json()
+        self.assertEqual('act_saved', Activity.objects.get(id=2).name)
         self.assertNotEqual(0, res['code'])
 
 
