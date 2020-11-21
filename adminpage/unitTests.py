@@ -1,9 +1,19 @@
+#!/usr/bin/env python
+# encoding: utf-8
+"""
+@author: zhouzl
+@contact: zzl850783164@163.com
+@software:
+@file: functionTests.py
+@time: 2020/11/20 20:38
+@desc:
+"""
 from django.test import TestCase, Client
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.conf import settings
 
-from adminpage.views import AdminLoginView, ActivityList
+from adminpage.views import AdminLoginView
 from codex.baseerror import PasswordError
 from wechat.models import Activity, Ticket
 
@@ -19,27 +29,27 @@ def create_superuser():
 def create_act():
     Activity.objects.create(id=1, name='act_deleted', key='key', place='place',
                             description='description',
-                            start_time=timezone.make_aware(datetime.datetime(2018, 10, 28, 8, 0, 0, 0)),
+                            start_time=timezone.now() + datetime.timedelta(1000),
                             pic_url="url",
-                            end_time=timezone.make_aware(datetime.datetime(2018, 10, 28, 18, 0, 0, 0)),
-                            book_start=timezone.now(),
-                            book_end=timezone.make_aware(datetime.datetime(2018, 10, 27, 18, 0, 0, 0)),
+                            end_time=timezone.now() + datetime.timedelta(2000),
+                            book_start=timezone.now() + datetime.timedelta(500),
+                            book_end=timezone.now() + datetime.timedelta(800),
                             total_tickets=1000, status=Activity.STATUS_DELETED, remain_tickets=1000)
     Activity.objects.create(id=2, name='act_saved', key='key', place='place',
                             description='description',
-                            start_time=timezone.make_aware(datetime.datetime(2018, 10, 28, 8, 0, 0, 0)),
+                            start_time=timezone.now() + datetime.timedelta(1000),
                             pic_url="url",
-                            end_time=timezone.make_aware(datetime.datetime(2018, 10, 28, 18, 0, 0, 0)),
-                            book_start=timezone.now(),
-                            book_end=timezone.make_aware(datetime.datetime(2018, 10, 27, 18, 0, 0, 0)),
+                            end_time=timezone.now() + datetime.timedelta(2000),
+                            book_start=timezone.now() + datetime.timedelta(500),
+                            book_end=timezone.now() + datetime.timedelta(800),
                             total_tickets=1000, status=Activity.STATUS_SAVED, remain_tickets=1000)
     Activity.objects.create(id=3, name='act_published', key='key', place='place',
                             description='description',
-                            start_time=timezone.make_aware(datetime.datetime(2018, 10, 28, 8, 0, 0, 0)),
+                            start_time=timezone.now() + datetime.timedelta(1000),
                             pic_url="url",
-                            end_time=timezone.make_aware(datetime.datetime(2018, 10, 28, 18, 0, 0, 0)),
-                            book_start=timezone.now(),
-                            book_end=timezone.make_aware(datetime.datetime(2018, 10, 27, 18, 0, 0, 0)),
+                            end_time=timezone.now() + datetime.timedelta(2000),
+                            book_start=timezone.now() - datetime.timedelta(500),
+                            book_end=timezone.now() + datetime.timedelta(500),
                             total_tickets=1000, status=Activity.STATUS_PUBLISHED, remain_tickets=1000)
 
 
@@ -54,24 +64,24 @@ class AdminLoginTest(TestCase):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         response = c.get('/api/a/login').json()
-        self.assertEqual(response['code'], 0)
+        self.assertEqual(0, response['code'])
 
     def test_get_not_login(self):
         c = Client()
         response = c.get('/api/a/login').json()
-        self.assertNotEqual(response['code'], 0)
+        self.assertNotEqual(0, response['code'])
 
     # 路由测试
     def test_login_url(self):
         c = Client()
         response = c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(200, response.status_code)
 
     # superuser登录测试
     def test_superuser(self):
         c = Client()
         response = c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
-        self.assertEqual(json.loads(response.content.decode())['code'], 0)
+        self.assertEqual(0, json.loads(response.content.decode())['code'])
 
     # user登录测试
     def test_user(self):
@@ -117,7 +127,7 @@ class AdminLogoutTest(TestCase):
         c = Client()
         res = c.post('/api/a/logout', content_type="application/json")
         code = res.json()['code']
-        self.assertNotEqual(code, 0)
+        self.assertNotEqual(0, code)
 
     # 登出测试
     def test_logout(self):
@@ -125,7 +135,7 @@ class AdminLogoutTest(TestCase):
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/logout', content_type="application/json")
         code = res.json()['code']
-        self.assertEqual(code, 0)
+        self.assertEqual(0, code)
 
 
 # 活动列表 API 6
@@ -140,14 +150,14 @@ class ActivityListTest(TestCase):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         response = c.get('/api/a/activity/list/').json()
-        self.assertEqual(response['code'], 0)
-        self.assertEqual(len(response['data']), 2)
+        self.assertEqual(0, response['code'])
+        self.assertEqual(2, len(response['data']))
 
     # get测试
     def test_get_list_no_login(self):
         c = Client()
         response = c.get('/api/a/activity/list/').json()
-        self.assertNotEqual(response['code'], 0)
+        self.assertNotEqual(0, response['code'])
 
     # 回退
     def tearDown(self):
@@ -176,8 +186,8 @@ class CreateActivityTest(TestCase):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/activity/create', act).json()
-        self.assertEqual(res['code'], 0)
-        self.assertEqual(Activity.objects.get(name='name').place, "place")
+        self.assertEqual(0, res['code'])
+        self.assertEqual("place", Activity.objects.get(name='name').place)
 
     def test_createActivity_not_login(self):
         act = {"name": "name1", "key": "key1", "place": "place1", "description": "description1", "picUrl": "picUrl1",
@@ -188,7 +198,7 @@ class CreateActivityTest(TestCase):
                "totalTickets": 1000, "status": Activity.STATUS_PUBLISHED}
         c = Client()
         res = c.post('/api/a/activity/create', act).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
 
 # 删除活动 API 7
@@ -204,33 +214,41 @@ class ActivityDeleteTest(TestCase):
 
     # 删除存在的活动
     def test_delete_act_exited(self):
-        self.assertEqual(Activity.objects.get(id=2).status, Activity.STATUS_SAVED)
+        self.assertEqual(Activity.STATUS_SAVED, Activity.objects.get(id=2).status)
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         rep = c.post('/api/a/activity/delete/', {'id': 2}).json()
-        self.assertEqual(Activity.objects.get(id=2).status, Activity.STATUS_DELETED)
-        self.assertEqual(rep['code'], 0)
+        self.assertEqual(Activity.STATUS_DELETED, Activity.objects.get(id=2).status)
+        self.assertEqual(0, rep['code'])
 
     # 不登录删除活动
     def test_delete_act_not_login(self):
         c = Client()
         rep = c.post('/api/a/activity/delete/', {'id': 3}).json()
-        self.assertEqual(Activity.objects.get(id=3).status, Activity.STATUS_PUBLISHED)
-        self.assertNotEqual(rep['code'], 0)
+        self.assertEqual(Activity.STATUS_PUBLISHED, Activity.objects.get(id=3).status)
+        self.assertNotEqual(0, rep['code'])
+
+    # 正在订票中的活动不可删除
+    def test_delete_act_booking(self):
+        self.assertEqual(Activity.STATUS_PUBLISHED, Activity.objects.get(id=3).status)
+        c = Client()
+        c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
+        rep = c.post('/api/a/activity/delete/', {'id': 3}).json()
+        self.assertNotEqual(0, rep['code'])
 
     # 删除已删除的活动
     def test_delete_act_deleted(self):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         rep = c.post('/api/a/activity/delete/', {'id': 1}).json()
-        self.assertNotEqual(rep['code'], 0)
+        self.assertNotEqual(0, rep['code'])
 
     # 删除不存在的活动
     def test_delete_act_not_exited(self):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         rep = c.post('/api/a/activity/delete/', {'id': 40}).json()
-        self.assertNotEqual(rep['code'], 0)
+        self.assertNotEqual(0, rep['code'])
 
 
 # 上传图像 API 9
@@ -248,14 +266,14 @@ class UploadImageTest(TestCase):
         path = os.path.join(settings.BASE_DIR, 'static/cat.jpg')
         with open(path, 'rb') as img:
             res = c.post('/api/a/image/upload', {'image': img}).json()
-        self.assertEqual(res['code'], 0)
+        self.assertEqual(0, res['code'])
 
     def test_upload_image_not_login(self):
         c = Client()
         path = os.path.join(settings.BASE_DIR, 'static/cat.jpg')
         with open(path, 'rb') as img:
             res = c.post('/api/a/image/upload', {'image': img}).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
 
 # 活动详情 API 10
@@ -273,19 +291,19 @@ class ActivityDetailTest(TestCase):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.get('/api/a/activity/detail', {'id': 2}).json()
-        self.assertEqual(res['code'], 0)
-        self.assertEqual(res['data']['name'], 'act_saved')
+        self.assertEqual(0, res['code'])
+        self.assertEqual('act_saved', res['data']['name'])
 
     def test_getDetail_not_login(self):
         c = Client()
         res = c.get('/api/a/activity/detail', {'id': 2}).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
     def test_getDetail_deleted_act(self):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.get('/api/a/activity/detail', {'id': 1}).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
     def test_postDetail(self):
         act_changed_detail = {
@@ -305,10 +323,34 @@ class ActivityDetailTest(TestCase):
         }
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
-        self.assertEqual(Activity.objects.get(id=2).name, 'act_saved')
+        self.assertEqual('act_saved', Activity.objects.get(id=2).name)
         res = c.post('/api/a/activity/detail', act_changed_detail).json()
-        self.assertEqual(Activity.objects.get(id=2).name, 'changed')
-        self.assertEqual(res['code'], 0)
+        self.assertEqual('changed', Activity.objects.get(id=2).name)
+        self.assertEqual(0, res['code'])
+
+    # 已发布的活动不可修改name和place
+    def test_postDetail_published(self):
+        act_changed_detail = {
+            "id": 3,
+            "name": 'changed',
+            "key": 'changed',
+            "place": 'changed',
+            "description": 'changed',
+            "start_time": timezone.now() + datetime.timedelta(1000),
+            "end_time": timezone.now() + datetime.timedelta(2000),
+            "book_start": timezone.now() - datetime.timedelta(500),
+            "book_end": timezone.now() + datetime.timedelta(500),
+            "total_tickets": 1000,
+            "status": Activity.STATUS_SAVED,
+            "remain_tickets": 1000,
+            "pic_url": "changed"
+        }
+        c = Client()
+        c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
+        self.assertEqual('act_published', Activity.objects.get(id=3).name)
+        res = c.post('/api/a/activity/detail', act_changed_detail).json()
+        self.assertEqual('act_published', Activity.objects.get(id=3).name)
+        self.assertNotEqual(0, res['code'])
 
     def test_postDetail_not_exist(self):
         act_changed_detail = {
@@ -329,7 +371,7 @@ class ActivityDetailTest(TestCase):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/activity/detail', act_changed_detail).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
     def test_postDetail_not_login(self):
         act_changed_detail = {
@@ -349,7 +391,7 @@ class ActivityDetailTest(TestCase):
         }
         c = Client()
         res = c.post('/api/a/activity/detail', act_changed_detail).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
 
 # 菜单测试 API 11
@@ -367,23 +409,23 @@ class MenuTest(TestCase):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.get('/api/a/activity/menu').json()
-        self.assertEqual(res['code'], 0)
+        self.assertEqual(0, res['code'])
 
     def test_getMenu_not_login(self):
         c = Client()
         res = c.get('/api/a/activity/menu').json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
     def test_postMenu(self):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/activity/menu', {2: 2, 3: 3}).json()
-        self.assertEqual(res['code'], 0)
+        self.assertEqual(0, res['code'])
 
     def test_postMenu_not_login(self):
         c = Client()
         res = c.post('/api/a/activity/menu', {2: 2, 3: 3}).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
 
 # 检票 API 12
@@ -414,26 +456,26 @@ class CheckinTest(TestCase):
     def test_checkin_vaild_not_login(self):
         c = Client()
         res = c.post('/api/a/activity/checkin', {'actId': 1, 'ticket': '3'}).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
     # 正常检票
     def test_checkin_vaild(self):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/activity/checkin', {'actId': 1, 'ticket': '3'}).json()
-        self.assertEqual(res['data']['ticket'], '3')
-        self.assertEqual(res['code'], 0)
+        self.assertEqual('3', res['data']['ticket'])
+        self.assertEqual(0, res['code'])
 
     # 已用票检票
     def test_checkin_used(self):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/activity/checkin', {'actId': 1, 'ticket': '2'}).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
 
     # 退票检票
     def test_checkin_cancelled(self):
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/activity/checkin', {'actId': 1, 'ticket': '1'}).json()
-        self.assertNotEqual(res['code'], 0)
+        self.assertNotEqual(0, res['code'])
