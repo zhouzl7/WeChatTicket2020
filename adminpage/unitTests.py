@@ -183,6 +183,7 @@ class CreateActivityTest(TestCase):
                "bookStart": timezone.now(),
                "bookEnd": timezone.make_aware(datetime.datetime(2018, 10, 27, 18, 0, 0, 0)),
                "totalTickets": 1000, "status": Activity.STATUS_PUBLISHED}
+        print(act)
         c = Client()
         c.post('/api/a/login', {"username": "superuser", "password": "123456test"})
         res = c.post('/api/a/activity/create', act).json()
